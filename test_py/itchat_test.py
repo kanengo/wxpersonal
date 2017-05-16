@@ -63,7 +63,7 @@ def handler_receive_msg(msg):
 @itchat.msg_register([NOTE])
 def handler_note_msg(msg):
 	wx_fch.note_handle(msg)
-#	return msg['Text']
+
 
 if __name__ == '__main__':
 	itchat.auto_login(enableCmdQR=True, hotReload=True)
