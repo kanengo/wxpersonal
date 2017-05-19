@@ -4,8 +4,18 @@ import time
 import os
 import re
 import imp
+import logging
 from itchat.content import *
 
+logging.basicConfig(level = logging.DEBUG
+	, filemode = "w"
+	, filename = "wx.log"
+	, format = "%(asctime)s-%(levelname)s-%(message)s")
+
+fn_handle = logging.FileHandler("wx_info.log")
+logger = logging.getLogger(str(logging.INFO))
+logger.addHandler(fn_handle)
+logger.setLevel(logging.INFO)
 
 msg_dict = {}
 fileMap = {
@@ -42,7 +52,8 @@ def fch_handle(msg):
 		or msg['Type'] == 'Video' \
 		or msg['Type'] == "Recording":
 		msg_content = r"" + msg['FileName']
-		msg['Text'](rec_tmp_dir + msg['FileName'])
+		# msg['Text'](rec_tmp_dir + msg['FileName'])
+		msg.download(rec_tmp_dir + msg['FileName'])
 
 	msg_dict[msg_id] = {
 				"msg_time_rec":msg_time_rec,
@@ -66,11 +77,12 @@ def note_handle(msg):
 		if oldMsgInfo is not None:
 			msg_body = oldMsgInfo["msg_from"] + "在" + oldMsgInfo["msg_time_rec"] + "撤回了一条消息:" + oldMsgInfo["msg_content"]
 			itchat.send(msg_body, "filehelper")
+			logger.info("%s msg_type:%s" %  (time.strftime("%Y-%m-%d %H:%M:%S"),oldMsgInfo["msg_type"]))
 			if oldMsgInfo["msg_type"] == "Picture" \
 				or oldMsgInfo["msg_type"] == "Video" \
 				or oldMsgInfo["msg_type"] == "Recording":
 				sendMsg = "@%s@%s" % (fileMap.get(oldMsgInfo["msg_type"]), (rec_tmp_dir + oldMsgInfo["msg_content"]))
-				print(sendMsg)
+				logger.info("%s sendMsg:%s" % (time.strftime("%Y-%m-%d %H:%M:%s"),sendMsg))
 				itchat.send(sendMsg, "filehelper")
 				os.remove(rec_tmp_dir + oldMsgInfo["msg_content"])
 			msg_dict.pop(oldMsgId)
